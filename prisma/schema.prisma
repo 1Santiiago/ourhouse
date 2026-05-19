@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Transaction {
+  id            Int      @id @default(autoincrement())
+  type          String   // "income" | "expense"
+  description   String
+  amount        Float
+  category      String
+  date          String   // "YYYY-MM-DD"
+  paymentMethod String
+  cardId        Int?
+  card          Card?    @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+}
+
+model Card {
+  id           Int           @id @default(autoincrement())
+  name         String
+  limit        Float
+  color        String
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+}
+
+model Goal {
+  id            Int            @id @default(autoincrement())
+  emoji         String
+  name          String
+  color         String
+  target        Float
+  deadline      String         // "YYYY-MM-DD"
+  contributions Contribution[]
+  createdAt     DateTime       @default(now())
+}
+
+model Contribution {
+  id        Int      @id @default(autoincrement())
+  goalId    Int
+  goal      Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  amount    Float
+  date      String   // "YYYY-MM-DD"
+  note      String   @default("")
+  createdAt DateTime @default(now())
+}

@@ -4,19 +4,18 @@ import { prisma } from '../../../lib/prisma'
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     if (req.method === 'GET') {
-      const data = await prisma.transaction.findMany({ orderBy: { date: 'desc' } })
+      const data = await prisma.recurring.findMany({ orderBy: { createdAt: 'asc' } })
       return res.json(data)
     }
     if (req.method === 'POST') {
-      const { type, description, amount, category, date, paymentMethod, cardId, installmentTotal, installmentCurrent } = req.body
-      const data = await prisma.transaction.create({
+      const { type, description, amount, category, paymentMethod, dayOfMonth, cardId } = req.body
+      const data = await prisma.recurring.create({
         data: {
           type, description,
           amount: parseFloat(String(amount)),
-          category, date, paymentMethod,
+          category, paymentMethod,
+          dayOfMonth: parseInt(String(dayOfMonth)),
           cardId: cardId ? parseInt(String(cardId)) : null,
-          installmentTotal:   installmentTotal   ? parseInt(String(installmentTotal))   : null,
-          installmentCurrent: installmentCurrent ? parseInt(String(installmentCurrent)) : null,
         }
       })
       return res.json(data)

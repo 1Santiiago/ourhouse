@@ -11,10 +11,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.json({ ok: true })
     }
 
-    res.setHeader('Allow', ['DELETE'])
+    if (req.method === 'PATCH') {
+      const { status } = req.body
+      const data = await prisma.transaction.update({
+        where: { id },
+        data: { status },
+      })
+      return res.json(data)
+    }
+
+    res.setHeader('Allow', ['DELETE', 'PATCH'])
     res.status(405).end()
   } catch (e) {
     console.error(e)
-    res.status(500).json({ error: 'Erro interno do servidor' })
+    res.status(500).json({ error: 'Erro interno' })
   }
 }

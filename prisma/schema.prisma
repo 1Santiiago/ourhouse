@@ -20,6 +20,7 @@ model Transaction {
   card               Card?     @relation(fields: [cardId], references: [id], onDelete: SetNull)
   installmentTotal   Int?
   installmentCurrent Int?
+  status             String    @default("pendente")
   createdAt          DateTime  @default(now())
 }
 

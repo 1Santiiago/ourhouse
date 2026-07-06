@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.json(data)
     }
     if (req.method === 'POST') {
-      const { type, description, amount, category, date, paymentMethod, cardId, installmentTotal, installmentCurrent } = req.body
+      const { type, description, amount, category, date, paymentMethod, cardId, installmentTotal, installmentCurrent, status } = req.body
       const data = await prisma.transaction.create({
         data: {
           type, description,
@@ -17,6 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           cardId: cardId ? parseInt(String(cardId)) : null,
           installmentTotal:   installmentTotal   ? parseInt(String(installmentTotal))   : null,
           installmentCurrent: installmentCurrent ? parseInt(String(installmentCurrent)) : null,
+          status: status ?? 'pendente',
         }
       })
       return res.json(data)

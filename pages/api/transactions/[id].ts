@@ -13,14 +13,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (req.method === 'PATCH') {
       const { status } = req.body
+      const data = await prisma.transaction.update({ where: { id }, data: { status } })
+      return res.json(data)
+    }
+
+    if (req.method === 'PUT') {
+      const { type, description, amount, category, date, paymentMethod, cardId, status } = req.body
       const data = await prisma.transaction.update({
         where: { id },
-        data: { status },
+        data: {
+          type, description,
+          amount: parseFloat(String(amount)),
+          category, date, paymentMethod,
+          cardId: cardId ? parseInt(String(cardId)) : null,
+          status: status ?? 'pendente',
+        },
       })
       return res.json(data)
     }
 
-    res.setHeader('Allow', ['DELETE', 'PATCH'])
+    res.setHeader('Allow', ['DELETE', 'PATCH', 'PUT'])
     res.status(405).end()
   } catch (e) {
     console.error(e)

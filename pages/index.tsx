@@ -16,7 +16,7 @@ interface ConfirmState { type: 'transaction'|'card'|'goal'|'contribution'|'recur
 const CAT_EXP = ['Alimentação','Moradia','Transporte','Saúde','Lazer','Educação','Vestuário','Assinaturas','Outros']
 const CAT_INC = ['Salário','Freelance','Investimentos','Aluguel Recebido','Outros']
 const MONTHS  = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
-const PCOLORS = ['#6EE7B7','#FCD34D','#FCA5A5','#C4B5FD','#93C5FD','#F9A8D4','#67E8F9','#BEF264','#FED7AA']
+const PCOLORS = ['#7C3AED','#059669','#E11D48','#D97706','#2563EB','#DB2777','#0891B2','#65A30D','#EA580C']
 const EMOJIS  = ['🚗','🏠','✈️','🏖️','📱','💻','🎓','💍','👶','🛋️','🏋️','🎸','⛵','🐕','🌿','🏥','🎯','🔑','💎','🛒']
 
 const fmt  = (v: number) => Number(v).toLocaleString('pt-BR', { style:'currency', currency:'BRL' })
@@ -27,26 +27,46 @@ const pad   = (n: number) => String(n).padStart(2,'0')
 const daysUntil   = (ds: string) => { const t=new Date(); t.setHours(0,0,0,0); return Math.ceil((new Date(ds+'T12:00:00').getTime()-t.getTime())/86400000) }
 const monthsUntil = (ds: string) => Math.max(1, Math.ceil(daysUntil(ds)/30.44))
 
-  const T = {
-    bg0: '#070510', bg1: '#0A0818', bg2: '#100D22', bg3: '#16122D', bg4: '#1D183A',
-    b1: '#2A2347', b2: '#352D5C',
-    t1: '#EDE8FF', t2: '#9488BA', t3: '#4E4470',
-    g:  '#2DD4BF', gd: '#14B8A6',
-    r:  '#FF6B8A', y:  '#FFB830', b:  '#60A5FA', p:  '#C084FC',
-    primary: '#7C5CFC', primaryD: '#5E3ED4',
-    r4:4, r8:8, r12:12, r14:14, r16:16, r20:20, r99:99,
-  }
+const T = {
+  bg1: '#F4F2FF',
+  bg2: '#FFFFFF',
+  bg3: '#F0ECFF',
+  bg4: '#E8E3FF',
+  b1:  '#E0D9FF',
+  b2:  '#C9BFFF',
+  t1:  '#1C1244',
+  t2:  '#6B5FA0',
+  t3:  '#9B8EC4',
+  g:   '#059669',
+  r:   '#E11D48',
+  y:   '#D97706',
+  b:   '#2563EB',
+  p:   '#7C3AED',
+  primary:  '#7C5CFC',
+  primaryD: '#5E3ED4',
+  // Cores sobre fundo violeta (hero + relatório)
+  on: {
+    label: 'rgba(255,255,255,0.65)',
+    value: '#FFFFFF',
+    sub:   'rgba(255,255,255,0.5)',
+    card:  'rgba(255,255,255,0.14)',
+  },
+  r4:4, r8:8, r10:10, r12:12, r14:14, r16:16, r20:20, r99:99,
+}
+
+const shadow = '0 1px 3px rgba(124,92,252,0.08), 0 4px 16px rgba(124,92,252,0.06)'
+const shadowSm = '0 1px 2px rgba(124,92,252,0.06)'
 
 const EMPTY_FORM = {
   type:'expense', description:'', amount:'', category:'Outros',
   date:today(), paymentMethod:'pix', cardId:'',
   mode:'unico', installments:'2', dayOfMonth:'5', status:'pendente',
 }
-const EMPTY_GOAL    = { emoji:'🎯', name:'', color:'#9B7FFF', target:'', deadline:'' }
+const EMPTY_GOAL    = { emoji:'🎯', name:'', color:'#7C5CFC', target:'', deadline:'' }
 const EMPTY_CONTRIB = { amount:'', date:today(), note:'' }
 
 const IS: React.CSSProperties = {
-  width:'100%', background:T.bg4, border:`1.5px solid ${T.b1}`,
+  width:'100%', background:T.bg3, border:`1.5px solid ${T.b1}`,
   borderRadius:T.r12, padding:'12px 14px', color:T.t1,
   fontSize:15, fontFamily:'inherit', outline:'none', transition:'border-color 0.15s',
 }
@@ -60,30 +80,30 @@ const PillBtn = ({ onClick, children, color, variant='primary', size='md', full 
   onClick:()=>void; children:React.ReactNode; color?:string;
   variant?:BtnVariant; size?:'sm'|'md'|'lg'; full?:boolean
 }) => {
-  const bg     = variant==='primary'?(color||T.primary):variant==='danger'?T.r:'transparent'
-  const border = variant==='outline'?`1.5px solid ${color||T.b2}`:variant==='ghost'?`1.5px solid ${T.b1}`:'none'
-  const textC  = variant==='primary'?'#fff':variant==='danger'?'#fff':(color||T.t2)
-  const pad2   = size==='sm'?'7px 14px':size==='lg'?'14px 28px':'10px 20px'
-  const fs     = size==='sm'?11:size==='lg'?15:13
+  const bg    = variant==='primary'?(color||T.primary):variant==='danger'?T.r:'transparent'
+  const bdr   = variant==='outline'?`1.5px solid ${color||T.b2}`:variant==='ghost'?`1.5px solid ${T.b1}`:'none'
+  const textC = variant==='primary'?'#fff':variant==='danger'?'#fff':(color||T.t2)
+  const p2    = size==='sm'?'6px 14px':size==='lg'?'14px 28px':'10px 20px'
+  const fs    = size==='sm'?11:size==='lg'?15:13
   return (
     <button onClick={onClick} style={{
-      background:bg, border, borderRadius:T.r99, color:textC,
-      fontWeight:700, cursor:'pointer', fontFamily:'inherit',
-      fontSize:fs, padding:pad2, display:'inline-flex', alignItems:'center',
-      justifyContent:'center', gap:6, width:full?'100%':undefined,
-      letterSpacing:'-0.2px', transition:'all 0.15s',
+      background:bg, border:bdr, borderRadius:T.r99, color:textC,
+      fontWeight:700, cursor:'pointer', fontFamily:'inherit', fontSize:fs,
+      padding:p2, display:'inline-flex', alignItems:'center', justifyContent:'center',
+      gap:6, width:full?'100%':undefined, letterSpacing:'-0.2px', transition:'all 0.15s',
+      boxShadow: variant==='primary'?`0 2px 8px ${bg}40`:undefined,
     }}>{children}</button>
   )
 }
 
 const Chip = ({label,color,bg}:{label:string;color:string;bg:string}) => (
-  <span style={{fontSize:9,fontWeight:800,color,background:bg,borderRadius:T.r99,padding:'2px 7px',letterSpacing:'0.5px',textTransform:'uppercase'}}>{label}</span>
+  <span style={{fontSize:9,fontWeight:800,color,background:bg,borderRadius:T.r99,padding:'2px 7px',letterSpacing:'0.5px',textTransform:'uppercase',flexShrink:0}}>{label}</span>
 )
 
 const IBtn = ({onClick,children,danger,active}:{onClick:()=>void;children:React.ReactNode;danger?:boolean;active?:boolean}) => (
   <button onClick={onClick} style={{
-    background:danger?`${T.r}12`:active?`${T.primary}15`:'transparent',
-    border:`1.5px solid ${danger?T.r+'30':active?T.primary+'40':T.b1}`,
+    background:danger?`${T.r}10`:active?`${T.primary}12`:`${T.bg3}`,
+    border:`1.5px solid ${danger?T.r+'25':active?T.primary+'35':T.b1}`,
     color:danger?T.r:active?T.primary:T.t3,
     borderRadius:T.r8, width:30, height:30, cursor:'pointer',
     display:'flex', alignItems:'center', justifyContent:'center',
@@ -91,16 +111,20 @@ const IBtn = ({onClick,children,danger,active}:{onClick:()=>void;children:React.
   }}>{children}</button>
 )
 
-const SectionLabel = ({children}:{children:React.ReactNode}) => (
-  <div style={{fontSize:10,fontWeight:800,color:T.t3,letterSpacing:'1.5px',textTransform:'uppercase',marginBottom:12}}>{children}</div>
+const SL = ({children,light}:{children:React.ReactNode;light?:boolean}) => (
+  <div style={{fontSize:10,fontWeight:800,color:light?T.on.label:T.t3,letterSpacing:'1.5px',textTransform:'uppercase',marginBottom:12}}>{children}</div>
+)
+
+const Card = ({children,style}:{children:React.ReactNode;style?:React.CSSProperties}) => (
+  <div style={{background:T.bg2,borderRadius:T.r16,padding:16,border:`1px solid ${T.b1}`,boxShadow:shadow,...style}}>{children}</div>
 )
 
 function ConfirmDialog({state,onConfirm,onCancel}:{state:ConfirmState|null;onConfirm:()=>void;onCancel:()=>void}) {
   if(!state) return null
   return (
-    <div style={{position:'fixed',inset:0,background:'#000D',display:'flex',alignItems:'center',justifyContent:'center',zIndex:500,padding:24}}>
-      <div style={{background:T.bg3,border:`1.5px solid ${T.r}25`,borderRadius:T.r20,padding:'32px 24px',maxWidth:300,width:'100%',textAlign:'center'}}>
-        <div style={{width:52,height:52,background:`${T.r}15`,borderRadius:T.r99,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,margin:'0 auto 16px'}}>🗑</div>
+    <div style={{position:'fixed',inset:0,background:'rgba(28,18,68,0.5)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:500,padding:24}}>
+      <div style={{background:T.bg2,border:`1px solid ${T.b1}`,borderRadius:T.r20,padding:'32px 24px',maxWidth:300,width:'100%',textAlign:'center',boxShadow:'0 20px 60px rgba(124,92,252,0.2)'}}>
+        <div style={{width:52,height:52,background:`${T.r}12`,borderRadius:T.r99,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,margin:'0 auto 16px'}}>🗑</div>
         <div style={{fontWeight:800,fontSize:16,marginBottom:8,color:T.t1}}>Confirmar exclusão</div>
         <div style={{fontSize:13,color:T.t2,marginBottom:28,lineHeight:1.6}}>{state.message}</div>
         <div style={{display:'flex',gap:8}}>
@@ -114,8 +138,8 @@ function ConfirmDialog({state,onConfirm,onCancel}:{state:ConfirmState|null;onCon
 
 function Sheet({onClose,children,title}:{onClose:()=>void;children:React.ReactNode;title:string}) {
   return (
-    <div style={{position:'fixed',inset:0,background:'#000B',display:'flex',alignItems:'flex-end',justifyContent:'center',zIndex:300}} onClick={onClose}>
-      <div style={{background:T.bg2,borderRadius:'24px 24px 0 0',padding:'0 20px 36px',width:'100%',maxWidth:500,maxHeight:'94vh',overflowY:'auto'}} onClick={e=>e.stopPropagation()}>
+    <div style={{position:'fixed',inset:0,background:'rgba(28,18,68,0.4)',display:'flex',alignItems:'flex-end',justifyContent:'center',zIndex:300}} onClick={onClose}>
+      <div style={{background:T.bg2,borderRadius:'24px 24px 0 0',padding:'0 20px 36px',width:'100%',maxWidth:500,maxHeight:'94vh',overflowY:'auto',boxShadow:'0 -8px 40px rgba(124,92,252,0.15)'}} onClick={e=>e.stopPropagation()}>
         <div style={{display:'flex',justifyContent:'center',padding:'12px 0 20px'}}>
           <div style={{width:36,height:4,background:T.b2,borderRadius:T.r99}}/>
         </div>
@@ -126,22 +150,24 @@ function Sheet({onClose,children,title}:{onClose:()=>void;children:React.ReactNo
   )
 }
 
-const SheetField = ({label,children}:{label:string;children:React.ReactNode}) => (
+const SF = ({label,children}:{label:string;children:React.ReactNode}) => (
   <div style={{marginBottom:14}}><label style={LS}>{label}</label>{children}</div>
 )
-const SheetRow = ({children}:{children:React.ReactNode}) => (
+const SR = ({children}:{children:React.ReactNode}) => (
   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:14}}>{children}</div>
 )
 
 function Seg({options,value,onChange}:{options:[string,string,string][];value:string;onChange:(v:string)=>void}) {
   return (
-    <div style={{display:'flex',background:T.bg4,borderRadius:T.r12,padding:4,gap:2,marginBottom:16}}>
+    <div style={{display:'flex',background:T.bg3,borderRadius:T.r12,padding:4,gap:2,marginBottom:16}}>
       {options.map(([v,l,c])=>(
         <button key={v} onClick={()=>onChange(v)} style={{
           flex:1,padding:'9px 4px',border:'none',borderRadius:T.r8,
           cursor:'pointer',fontWeight:700,fontSize:12,fontFamily:'inherit',
-          background:value===v?c+'22':'transparent',
-          color:value===v?c:T.t3, transition:'all 0.15s',
+          background:value===v?T.bg2:'transparent',
+          color:value===v?c:T.t3,
+          boxShadow:value===v?shadowSm:undefined,
+          transition:'all 0.15s',
         }}>{l}</button>
       ))}
     </div>
@@ -150,8 +176,8 @@ function Seg({options,value,onChange}:{options:[string,string,string][];value:st
 
 const StatusPill = ({status,onClick}:{status:string;onClick:()=>void}) => (
   <button onClick={onClick} style={{
-    background:status==='pago'?`${T.g}15`:`${T.y}12`,
-    border:`1.5px solid ${status==='pago'?T.g+'35':T.y+'30'}`,
+    background:status==='pago'?`${T.g}12`:`${T.y}10`,
+    border:`1.5px solid ${status==='pago'?T.g+'30':T.y+'25'}`,
     color:status==='pago'?T.g:T.y,
     borderRadius:T.r99,padding:'3px 9px',fontSize:10,fontWeight:800,
     cursor:'pointer',fontFamily:'inherit',whiteSpace:'nowrap',letterSpacing:'0.3px',
@@ -160,17 +186,16 @@ const StatusPill = ({status,onClick}:{status:string;onClick:()=>void}) => (
   </button>
 )
 
-// ── EyeBtn ────────────────────────────────────────────────────────────────────
 const EyeBtn = ({hidden,onClick}:{hidden:boolean;onClick:()=>void}) => (
   <button onClick={onClick} style={{
-    background:hidden?`${T.primary}20`:'transparent',
-    border:`1.5px solid ${hidden?T.primary+'50':T.b1}`,
+    background:hidden?`${T.primary}12`:T.bg3,
+    border:`1.5px solid ${hidden?T.primary+'40':T.b1}`,
     color:hidden?T.primary:T.t3,
-    borderRadius:T.r8, width:30, height:30, cursor:'pointer',
-    display:'flex', alignItems:'center', justifyContent:'center',
-    fontSize:13, flexShrink:0, transition:'all 0.2s',
+    borderRadius:T.r8,width:30,height:30,cursor:'pointer',
+    display:'flex',alignItems:'center',justifyContent:'center',
+    fontSize:13,flexShrink:0,transition:'all 0.2s',
   }}>
-    {hidden ? '👁' : '🙈'}
+    {hidden?'👁':'🙈'}
   </button>
 )
 
@@ -182,7 +207,7 @@ export default function Home() {
   const [loading,      setLoading]      = useState(true)
   const [saving,       setSaving]       = useState(false)
   const [authed,       setAuthed]       = useState(false)
-  const [hidden,       setHidden]       = useState(false)   // ← esconder valores
+  const [hidden,       setHidden]       = useState(false)
 
   const [tab,          setTab]          = useState('home')
   const [month,        setMonth]        = useState(new Date().getMonth())
@@ -199,13 +224,11 @@ export default function Home() {
 
   const [form,      setForm]      = useState(EMPTY_FORM)
   const [editForm,  setEditForm]  = useState({type:'expense',description:'',amount:'',category:'Outros',date:today(),paymentMethod:'pix',cardId:'',status:'pendente'})
-  const [cardForm,  setCardForm]  = useState({name:'',limit:'',color:'#9B7FFF'})
+  const [cardForm,  setCardForm]  = useState({name:'',limit:'',color:'#7C5CFC'})
   const [goalForm,  setGoalForm]  = useState(EMPTY_GOAL)
   const [contrib,   setContrib]   = useState(EMPTY_CONTRIB)
 
-  // fmt com máscara
   const fmtH = (v: number) => hidden ? '••••' : fmt(v)
-  const fmtHK = (v: number) => hidden ? '•••' : fmtK(v)
 
   useEffect(()=>{
     if(localStorage.getItem('ff_auth')!=='ok') window.location.replace('/login')
@@ -331,7 +354,7 @@ export default function Home() {
   const addCard = ()=>save(async()=>{
     if(!cardForm.name.trim()||!cardForm.limit) return
     await fetch('/api/cards',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cardForm)})
-    await refetch();setShowCard(false);setCardForm({name:'',limit:'',color:'#9B7FFF'})
+    await refetch();setShowCard(false);setCardForm({name:'',limit:'',color:'#7C5CFC'})
   })
 
   const addGoal = ()=>save(async()=>{
@@ -359,18 +382,18 @@ export default function Home() {
 
   if(loading) return (
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16,background:T.bg1}}>
-      <div style={{width:56,height:56,background:`linear-gradient(135deg,${T.primary},${T.primaryD})`,borderRadius:T.r16,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:900,color:'#fff',boxShadow:`0 0 40px ${T.primary}50`}}>₢</div>
+      <div style={{width:56,height:56,background:`linear-gradient(135deg,${T.primary},${T.primaryD})`,borderRadius:T.r16,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,fontWeight:900,color:'#fff',boxShadow:`0 4px 20px ${T.primary}50`}}>₢</div>
       <div style={{fontWeight:800,fontSize:17,color:T.t1,letterSpacing:'-0.3px'}}>FinançasFácil</div>
       <div style={{width:28,height:28,border:`2px solid ${T.b2}`,borderTop:`2px solid ${T.primary}`,borderRadius:T.r99,animation:'spin 0.7s linear infinite'}}/>
     </div>
   )
 
   const navItems = [
-    {id:'home',     icon:'⌂', label:'Início'},
-    {id:'lancamentos',icon:'↕',label:'Lançamentos'},
-    {id:'cartoes',  icon:'▭', label:'Cartões'},
-    {id:'metas',    icon:'◎', label:'Metas'},
-    {id:'relatorio',icon:'≡', label:'Relatório'},
+    {id:'home',       icon:'⌂', label:'Início'},
+    {id:'lancamentos',icon:'↕', label:'Lançamentos'},
+    {id:'cartoes',    icon:'▭', label:'Cartões'},
+    {id:'metas',      icon:'◎', label:'Metas'},
+    {id:'relatorio',  icon:'≡', label:'Relatório'},
   ]
 
   return (
@@ -384,174 +407,176 @@ export default function Home() {
           body{background:${T.bg1};font-family:'Inter',sans-serif;color:${T.t1};overscroll-behavior:none}
           input::placeholder{color:${T.t3}}
           input:focus,select:focus{border-color:${T.primary}!important;outline:none}
-          select option{background:${T.bg3}}
+          select option{background:${T.bg2};color:${T.t1}}
           ::-webkit-scrollbar{width:0;height:0}
           @keyframes spin{to{transform:rotate(360deg)}}
-          @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-          @keyframes blur-in{from{filter:blur(8px);opacity:0}to{filter:blur(0);opacity:1}}
+          @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
           .fade{animation:fadeIn 0.2s ease both}
-          .val{transition:filter 0.2s ease}
         `}</style>
       </Head>
 
       {saving&&<div style={{position:'fixed',top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${T.primary},${T.p})`,zIndex:999}}/>}
 
       {/* ── HEADER ── */}
-      <header style={{background:T.bg2,borderBottom:`1px solid ${T.b1}`,padding:'0 16px',height:54,display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:100}}>
+      <header style={{background:T.bg2,borderBottom:`1px solid ${T.b1}`,padding:'0 16px',height:54,display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:100,boxShadow:shadowSm}}>
         <div style={{display:'flex',alignItems:'center',gap:10}}>
-          <div style={{background:`linear-gradient(135deg,${T.primary},${T.primaryD})`,borderRadius:10,width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:13,color:'#fff',flexShrink:0,boxShadow:`0 0 12px ${T.primary}40`}}>₢</div>
+          <div style={{background:`linear-gradient(135deg,${T.primary},${T.primaryD})`,borderRadius:10,width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:13,color:'#fff',flexShrink:0}}>₢</div>
           <div>
             <div style={{fontWeight:800,fontSize:14,letterSpacing:'-0.4px',color:T.t1,lineHeight:1}}>FinançasFácil</div>
             <div style={{fontSize:9,color:T.t3,letterSpacing:'1px'}}>CONTROLE FAMILIAR</div>
           </div>
         </div>
         <div style={{display:'flex',alignItems:'center',gap:6}}>
-          <div style={{display:'flex',alignItems:'center',gap:2,background:T.bg4,borderRadius:T.r99,padding:'5px 10px',border:`1px solid ${T.b1}`}}>
+          <div style={{display:'flex',alignItems:'center',gap:2,background:T.bg3,borderRadius:T.r99,padding:'5px 10px',border:`1px solid ${T.b1}`}}>
             <button onClick={prevM} style={{background:'none',border:'none',color:T.t3,cursor:'pointer',fontSize:15,lineHeight:1,padding:'0 2px'}}>‹</button>
             <span style={{fontWeight:700,fontSize:11,minWidth:82,textAlign:'center',color:T.t2}}>{MONTHS[month].slice(0,3)} {year}</span>
             <button onClick={nextM} style={{background:'none',border:'none',color:T.t3,cursor:'pointer',fontSize:15,lineHeight:1,padding:'0 2px'}}>›</button>
           </div>
-          {/* Botão esconder valores */}
           <EyeBtn hidden={hidden} onClick={()=>setHidden(h=>!h)}/>
           <IBtn onClick={logout} danger>⏻</IBtn>
         </div>
       </header>
 
       {/* ── MAIN ── */}
-      <main style={{padding:'14px 14px 100px',maxWidth:560,margin:'0 auto'}}>
+      <main style={{padding:'16px 14px 100px',maxWidth:560,margin:'0 auto'}}>
 
         {/* ════ HOME ════ */}
         {tab==='home'&&(
           <div className="fade" style={{display:'flex',flexDirection:'column',gap:12}}>
 
-            {/* Hero card */}
-            <div style={{background:`linear-gradient(135deg,${T.bg3} 0%,#120A30 100%)`,borderRadius:T.r20,padding:'22px 20px',border:`1px solid ${T.b2}`,position:'relative',overflow:'hidden'}}>
-              <div style={{position:'absolute',right:-30,top:-30,width:140,height:140,borderRadius:'50%',background:`${T.primary}08`}}/>
-              <div style={{position:'absolute',right:10,bottom:-20,width:80,height:80,borderRadius:'50%',background:`${T.p}06`}}/>
+            {/* ── Hero card (fundo violeta — textos sempre brancos) ── */}
+            <div style={{background:`linear-gradient(135deg,${T.primary} 0%,${T.primaryD} 100%)`,borderRadius:T.r20,padding:'24px 20px',position:'relative',overflow:'hidden',boxShadow:`0 8px 32px ${T.primary}40`}}>
+              {/* Decoração */}
+              <div style={{position:'absolute',right:-40,top:-40,width:160,height:160,borderRadius:'50%',background:'rgba(255,255,255,0.08)'}}/>
+              <div style={{position:'absolute',left:-20,bottom:-30,width:100,height:100,borderRadius:'50%',background:'rgba(255,255,255,0.05)'}}/>
 
-              {/* Saldo + botão olho inline */}
-              <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',marginBottom:4}}>
-                <div style={{fontSize:10,fontWeight:800,color:T.t3,letterSpacing:'1.5px'}}>SALDO PREVISTO</div>
-                <button onClick={()=>setHidden(h=>!h)} style={{background:'transparent',border:'none',cursor:'pointer',fontSize:14,color:T.t3,padding:0,lineHeight:1,opacity:0.7}}>{hidden?'👁':'🙈'}</button>
+              {/* Label + olho */}
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}>
+                <span style={{fontSize:10,fontWeight:800,color:'rgba(255,255,255,0.6)',letterSpacing:'1.5px'}}>SALDO PREVISTO</span>
+             
               </div>
 
-              {/* Truque de blur real via wrapper */}
-              <div style={{position:'relative'}}>
-                <div style={{fontSize:32,fontWeight:900,color:balance>=0?T.g:T.r,fontFamily:"'JetBrains Mono',monospace",letterSpacing:'-1px',marginBottom:4,filter:hidden?'blur(10px)':'none',transition:'filter 0.3s ease',userSelect:'none'}}>
-                  {fmt(balance)}
-                </div>
-                <div style={{fontSize:11,color:T.t3,marginBottom:20,filter:hidden?'blur(6px)':'none',transition:'filter 0.3s ease'}}>
-                  {MONTHS[month]} {year} · poupança {hidden?'••%':`${savings}%`}
-                </div>
+              {/* Saldo */}
+              <div style={{fontSize:34,fontWeight:900,color:'#FFFFFF',fontFamily:"'JetBrains Mono',monospace",letterSpacing:'-1px',marginBottom:4,filter:hidden?'blur(10px)':'none',transition:'filter 0.3s ease',userSelect:'none'}}>
+                {fmt(balance)}
+              </div>
+              <div style={{fontSize:11,color:'rgba(255,255,255,0.55)',marginBottom:20}}>
+                {MONTHS[month]} {year} · poupança {hidden?'•••':`${savings}%`}
               </div>
 
+              {/* Mini cards entradas/saídas */}
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
                 {[
-                  {label:'Entradas',val:income,color:T.g,icon:'↑'},
-                  {label:'Saídas',  val:expense,color:T.r,icon:'↓'},
+                  {label:'Entradas',val:income, color:'#6EF5D4',icon:'↑'},
+                  {label:'Saídas',  val:expense, color:'#FF8FAB',icon:'↓'},
                 ].map(k=>(
-                  <div key={k.label} style={{background:'#FFFFFF08',borderRadius:T.r12,padding:'10px 12px'}}>
-                    <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:4}}>
-                      <span style={{fontSize:11,color:k.color,fontWeight:700}}>{k.icon}</span>
-                      <span style={{fontSize:9,color:T.t3,fontWeight:700,letterSpacing:'1px',textTransform:'uppercase'}}>{k.label}</span>
+                  <div key={k.label} style={{background:'rgba(255,255,255,0.14)',borderRadius:T.r12,padding:'10px 12px',backdropFilter:'blur(4px)'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:5}}>
+                      <span style={{fontSize:12,color:k.color,fontWeight:700}}>{k.icon}</span>
+                      <span style={{fontSize:9,color:'rgba(255,255,255,0.6)',fontWeight:700,letterSpacing:'1px',textTransform:'uppercase'}}>{k.label}</span>
                     </div>
-                    <div style={{fontSize:16,fontWeight:800,color:k.color,fontFamily:"'JetBrains Mono',monospace",filter:hidden?'blur(8px)':'none',transition:'filter 0.3s ease'}}>{fmt(k.val)}</div>
+                    <div style={{fontSize:16,fontWeight:800,color:'#FFFFFF',fontFamily:"'JetBrains Mono',monospace",filter:hidden?'blur(8px)':'none',transition:'filter 0.3s'}}>{fmt(k.val)}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Status row */}
-            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6}}>
+            {/* ── Status row ── */}
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8}}>
               {[
-                {label:'Recebido',val:paidIn,   color:T.g},
-                {label:'Pago',    val:paidOut,  color:T.b},
-                {label:'A pagar', val:pendingOut,color:T.y},
+                {label:'Recebido',val:paidIn,   color:T.g, bg:`${T.g}10`},
+                {label:'Pago',    val:paidOut,  color:T.b, bg:`${T.b}10`},
+                {label:'A pagar', val:pendingOut,color:T.y, bg:`${T.y}10`},
               ].map(s=>(
-                <div key={s.label} style={{background:T.bg2,borderRadius:T.r12,padding:'10px 10px',border:`1px solid ${T.b1}`}}>
-                  <div style={{fontSize:8,color:T.t3,fontWeight:800,letterSpacing:'1px',textTransform:'uppercase',marginBottom:5}}>{s.label}</div>
-                  <div style={{fontSize:13,fontWeight:800,color:s.color,fontFamily:"'JetBrains Mono',monospace",filter:hidden?'blur(6px)':'none',transition:'filter 0.3s ease'}}>{fmt(s.val)}</div>
+                <div key={s.label} style={{background:T.bg2,borderRadius:T.r14,padding:'12px 10px',border:`1px solid ${T.b1}`,boxShadow:shadowSm}}>
+                  <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:6}}>
+                    <div style={{width:6,height:6,borderRadius:'50%',background:s.color,flexShrink:0}}/>
+                    <span style={{fontSize:8,color:T.t3,fontWeight:800,letterSpacing:'1px',textTransform:'uppercase'}}>{s.label}</span>
+                  </div>
+                  <div style={{fontSize:13,fontWeight:800,color:s.color,fontFamily:"'JetBrains Mono',monospace",filter:hidden?'blur(6px)':'none',transition:'filter 0.3s'}}>{fmt(s.val)}</div>
                 </div>
               ))}
             </div>
 
-            {/* Metas preview */}
+            {/* ── Metas preview ── */}
             {goalStats.length>0&&(
-              <div style={{background:T.bg2,borderRadius:T.r16,padding:16,border:`1px solid ${T.b1}`}}>
+              <Card>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
-                  <SectionLabel>Metas</SectionLabel>
+                  <SL>Metas</SL>
                   <span style={{fontSize:10,color:T.t3,fontFamily:"'JetBrains Mono',monospace",filter:hidden?'blur(6px)':'none',transition:'filter 0.3s'}}>{fmtH(totalSaved)} / {fmtH(totalTarget)}</span>
                 </div>
                 {goalStats.slice(0,3).map(g=>(
                   <div key={g.id} style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
                     <span style={{fontSize:18,flexShrink:0}}>{g.emoji}</span>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                      <div style={{display:'flex',justifyContent:'space-between',marginBottom:5}}>
                         <span style={{fontSize:12,fontWeight:600,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:T.t1}}>{g.name}</span>
                         <span style={{fontSize:10,color:g.done?T.g:T.t3,flexShrink:0,marginLeft:6,fontWeight:700}}>{hidden?'••%':`${g.pct.toFixed(0)}%`}</span>
                       </div>
-                      <div style={{background:T.bg4,borderRadius:T.r99,height:4}}>
-                        <div style={{background:g.done?T.g:g.color,borderRadius:T.r99,height:4,width:`${g.pct}%`,transition:'width 0.5s ease',boxShadow:g.done?`0 0 8px ${T.g}60`:undefined}}/>
+                      <div style={{background:T.bg4,borderRadius:T.r99,height:5}}>
+                        <div style={{background:g.done?T.g:g.color,borderRadius:T.r99,height:5,width:`${g.pct}%`,transition:'width 0.5s ease'}}/>
                       </div>
                     </div>
                   </div>
                 ))}
-              </div>
+              </Card>
             )}
 
-            {/* Histórico */}
-            <div style={{background:T.bg2,borderRadius:T.r16,padding:'16px 12px',border:`1px solid ${T.b1}`}}>
-              <SectionLabel>Histórico 6 meses</SectionLabel>
+            {/* ── Histórico ── */}
+            <Card style={{padding:'16px 12px'}}>
+              <SL>Histórico 6 meses</SL>
               <ResponsiveContainer width="100%" height={140}>
                 <BarChart data={histData} barCategoryGap="40%" barGap={2}>
                   <XAxis dataKey="month" tick={{fill:T.t3,fontSize:10,fontFamily:'Inter'}} axisLine={false} tickLine={false}/>
-                  <YAxis tick={{fill:T.t3,fontSize:9}} axisLine={false} tickLine={false} tickFormatter={v=>hidden?'•':fmtK(v)} width={26}/>
-                  <Tooltip formatter={(v:number)=>hidden?'••••':fmt(v)} contentStyle={{background:T.bg3,border:`1px solid ${T.b2}`,borderRadius:T.r8,color:T.t1,fontSize:11}} labelStyle={{color:T.t2}}/>
-                  <Bar dataKey="income"  fill={T.g}   radius={[4,4,0,0]} name="Entradas" fillOpacity={0.9}/>
-                  <Bar dataKey="expense" fill={T.r}   radius={[4,4,0,0]} name="Saídas"   fillOpacity={0.45}/>
+                  <YAxis tick={{fill:T.t3,fontSize:9}} axisLine={false} tickLine={false} tickFormatter={v=>hidden?'•':fmtK(v)} width={28}/>
+                  <Tooltip formatter={(v:number)=>hidden?'••••':fmt(v)} contentStyle={{background:T.bg2,border:`1px solid ${T.b1}`,borderRadius:T.r8,color:T.t1,fontSize:11,boxShadow:shadow}} labelStyle={{color:T.t2}}/>
+                  <Bar dataKey="income"  fill={T.g}  radius={[4,4,0,0]} name="Entradas" fillOpacity={0.85}/>
+                  <Bar dataKey="expense" fill={T.r}  radius={[4,4,0,0]} name="Saídas"   fillOpacity={0.5}/>
                 </BarChart>
               </ResponsiveContainer>
-              <div style={{display:'flex',gap:14,justifyContent:'center',marginTop:8}}>
+              <div style={{display:'flex',gap:16,justifyContent:'center',marginTop:10}}>
                 {[[T.g,'Entradas'],[T.r,'Saídas']].map(([c,l])=>(
-                  <div key={l} style={{display:'flex',alignItems:'center',gap:4}}>
+                  <div key={l} style={{display:'flex',alignItems:'center',gap:5}}>
                     <div style={{width:8,height:8,borderRadius:2,background:c}}/>
                     <span style={{fontSize:10,color:T.t3,fontWeight:600}}>{l}</span>
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            {/* Cat + Recentes */}
+            {/* ── Categorias + Recentes ── */}
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-              <div style={{background:T.bg2,borderRadius:T.r16,padding:14,border:`1px solid ${T.b1}`}}>
-                <SectionLabel>Categorias</SectionLabel>
+              <Card style={{padding:14}}>
+                <SL>Categorias</SL>
                 {catData.length>0?(
                   <>
                     <ResponsiveContainer width="100%" height={90}>
                       <PieChart>
-                        <Pie data={catData} dataKey="value" cx="50%" cy="50%" outerRadius={38} innerRadius={20} paddingAngle={2} strokeWidth={0}>
+                        <Pie data={catData} dataKey="value" cx="50%" cy="50%" outerRadius={38} innerRadius={22} paddingAngle={2} strokeWidth={0}>
                           {catData.map((_,i)=><Cell key={i} fill={PCOLORS[i%PCOLORS.length]}/>)}
                         </Pie>
-                        <Tooltip formatter={(v:number)=>hidden?'••••':fmt(v)} contentStyle={{background:T.bg3,border:`1px solid ${T.b2}`,borderRadius:T.r8,color:T.t1,fontSize:10}}/>
+                        <Tooltip formatter={(v:number)=>hidden?'••••':fmt(v)} contentStyle={{background:T.bg2,border:`1px solid ${T.b1}`,borderRadius:T.r8,color:T.t1,fontSize:10}}/>
                       </PieChart>
                     </ResponsiveContainer>
-                    {catData.slice(0,3).map((c,i)=>(
-                      <div key={c.name} style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:4}}>
-                        <div style={{display:'flex',alignItems:'center',gap:4}}>
-                          <div style={{width:5,height:5,borderRadius:'50%',background:PCOLORS[i%PCOLORS.length]}}/>
-                          <span style={{fontSize:9,color:T.t2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:52}}>{c.name}</span>
+                    <div style={{display:'flex',flexDirection:'column',gap:5,marginTop:8}}>
+                      {catData.slice(0,3).map((c,i)=>(
+                        <div key={c.name} style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                          <div style={{display:'flex',alignItems:'center',gap:5}}>
+                            <div style={{width:5,height:5,borderRadius:'50%',background:PCOLORS[i%PCOLORS.length],flexShrink:0}}/>
+                            <span style={{fontSize:9,color:T.t2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:54}}>{c.name}</span>
+                          </div>
+                          <span style={{fontSize:9,fontWeight:700,fontFamily:"'JetBrains Mono',monospace",color:T.t1,filter:hidden?'blur(5px)':'none',transition:'filter 0.3s'}}>{fmt(c.value)}</span>
                         </div>
-                        <span style={{fontSize:9,fontWeight:700,fontFamily:"'JetBrains Mono',monospace",color:T.t1,filter:hidden?'blur(5px)':'none',transition:'filter 0.3s'}}>{fmt(c.value)}</span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </>
-                ):<div style={{textAlign:'center',color:T.t3,fontSize:11,padding:16}}>Sem gastos</div>}
-              </div>
+                ):<div style={{textAlign:'center',color:T.t3,fontSize:11,padding:'20px 0'}}>Sem gastos</div>}
+              </Card>
 
-              <div style={{background:T.bg2,borderRadius:T.r16,padding:14,border:`1px solid ${T.b1}`}}>
-                <SectionLabel>Recentes</SectionLabel>
-                {monthTx.length===0?<div style={{textAlign:'center',color:T.t3,fontSize:11,padding:16}}>Vazio</div>:(
-                  <div style={{display:'flex',flexDirection:'column',gap:9}}>
+              <Card style={{padding:14}}>
+                <SL>Recentes</SL>
+                {monthTx.length===0?<div style={{textAlign:'center',color:T.t3,fontSize:11,padding:'20px 0'}}>Vazio</div>:(
+                  <div style={{display:'flex',flexDirection:'column',gap:10}}>
                     {[...monthTx].reverse().slice(0,5).map(t=>(
                       <div key={t.id} style={{display:'flex',justifyContent:'space-between',gap:4}}>
                         <div style={{overflow:'hidden',flex:1}}>
@@ -563,7 +588,7 @@ export default function Home() {
                     ))}
                   </div>
                 )}
-              </div>
+              </Card>
             </div>
           </div>
         )}
@@ -573,7 +598,7 @@ export default function Home() {
           <div className="fade">
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
               <div>
-                <div style={{fontWeight:800,fontSize:17,letterSpacing:'-0.3px'}}>Lançamentos</div>
+                <div style={{fontWeight:800,fontSize:17,letterSpacing:'-0.3px',color:T.t1}}>Lançamentos</div>
                 <div style={{fontSize:11,color:T.t3,marginTop:2}}>{MONTHS[month]} · {monthTx.length} registros</div>
               </div>
               <PillBtn onClick={()=>setShowNew(true)} color={T.primary}>+ Novo</PillBtn>
@@ -586,8 +611,9 @@ export default function Home() {
                   padding:'6px 14px',border:`1.5px solid ${statusFilter===s?T.primary:T.b1}`,
                   borderRadius:T.r99,cursor:'pointer',fontWeight:statusFilter===s?700:500,
                   fontSize:11,fontFamily:'Inter',
-                  background:statusFilter===s?`${T.primary}15`:'transparent',
-                  color:statusFilter===s?T.primary:T.t3,whiteSpace:'nowrap',transition:'all 0.15s',
+                  background:statusFilter===s?`${T.primary}12`:T.bg2,
+                  color:statusFilter===s?T.primary:T.t3,
+                  whiteSpace:'nowrap',transition:'all 0.15s',boxShadow:shadowSm,
                 }}>
                   {s==='todos'?`Todos (${monthTx.length})`:s==='pago'?`✓ Pagos (${monthTx.filter(t=>t.status==='pago').length})`:`⏳ Pendentes (${monthTx.filter(t=>t.status==='pendente').length})`}
                 </button>
@@ -596,23 +622,23 @@ export default function Home() {
 
             {/* Fixos */}
             {recurring.length>0&&(
-              <div style={{background:T.bg2,borderRadius:T.r16,padding:14,marginBottom:12,border:`1px solid ${T.y}20`}}>
-                <SectionLabel>Fixos mensais</SectionLabel>
+              <div style={{background:T.bg2,borderRadius:T.r16,padding:14,marginBottom:12,border:`1px solid ${T.b1}`,borderLeft:`3px solid ${T.y}`,boxShadow:shadowSm}}>
+                <SL>Fixos mensais</SL>
                 <div style={{display:'flex',flexDirection:'column',gap:6}}>
                   {recurring.map(r=>{
                     const ap=isApplied(r)
                     return(
-                      <div key={r.id} style={{display:'flex',alignItems:'center',gap:8,padding:'8px 10px',background:T.bg4,borderRadius:T.r8,opacity:r.active?1:0.4}}>
-                        <div style={{flex:1,minWidth:0}}>
-                          <div style={{display:'flex',alignItems:'center',gap:5}}>
-                            <span style={{fontSize:12,fontWeight:700,color:T.t1}}>{r.description}</span>
-                            <Chip label={`dia ${r.dayOfMonth}`} color={T.t3} bg={T.bg3}/>
+                      <div key={r.id} style={{display:'flex',alignItems:'center',gap:8,padding:'10px 12px',background:T.bg3,borderRadius:T.r12,opacity:r.active?1:0.4,border:`1px solid ${T.b1}`}}>
+                        <div style={{flex:1,minWidth:0 }}>
+                            <p style={{fontSize:12,fontWeight:700,color:T.t1}}>{r.description}</p>
+                          <div style={{display:'flex',alignItems:'center',gap:6}}> 
+                            <Chip label={`dia ${r.dayOfMonth}`} color={T.t3} bg={T.b1}/>
                           </div>
-                          <div style={{fontSize:10,color:T.t3,marginTop:1}}>{r.category}</div>
+                          <div style={{fontSize:10,color:T.t3,marginTop:2}}>{r.category}</div>
                         </div>
                         <span style={{fontSize:12,fontWeight:800,color:r.type==='income'?T.g:T.r,fontFamily:"'JetBrains Mono',monospace",flexShrink:0,filter:hidden?'blur(6px)':'none',transition:'filter 0.3s'}}>{r.type==='income'?'+':'−'}{fmt(r.amount)}</span>
                         {r.active&&!ap&&<PillBtn onClick={()=>applyR(r)} size="sm" color={T.g} variant="outline">Aplicar</PillBtn>}
-                        {ap&&<Chip label="✓ ok" color={T.g} bg={`${T.g}15`}/>}
+                        {ap&&<Chip label="✓ ok" color={T.g} bg={`${T.g}12`}/>}
                         <IBtn onClick={()=>toggleR(r)} active={r.active}>{r.active?'⏸':'▶'}</IBtn>
                         <IBtn onClick={()=>setConfirm({type:'recurring',id:r.id,message:`Excluir o fixo "${r.description}"?`})} danger>×</IBtn>
                       </div>
@@ -630,19 +656,22 @@ export default function Home() {
                 <div style={{fontSize:12,color:T.t3,marginTop:4}}>{statusFilter!=='todos'?`Nenhum "${statusFilter}" este mês`:'Toque em "+ Novo" para começar'}</div>
               </div>
             ):(
-              <div style={{display:'flex',flexDirection:'column',gap:6}}>
+              <div style={{display:'flex',flexDirection:'column',gap:8}}>
                 {filteredTx.map(t=>{
                   const cd=cards.find(c=>c.id===t.cardId)
                   return(
-                    <div key={t.id} style={{background:T.bg2,borderRadius:T.r14,padding:'12px 14px',display:'flex',alignItems:'center',gap:10,border:`1px solid ${t.status==='pago'?T.primary+'30':T.b1}`,transition:'border-color 0.2s'}}>
-                      <div style={{width:3,height:38,borderRadius:T.r99,background:t.type==='income'?T.g:T.r,flexShrink:0}}/>
+                    <div key={t.id} style={{background:T.bg2,borderRadius:T.r14,padding:'12px 14px',display:'flex',alignItems:'center',gap:10,border:`1px solid ${t.status==='pago'?T.primary+'25':T.b1}`,boxShadow:shadowSm,transition:'border-color 0.2s'}}>
+                      {/* Barra lateral */}
+                      <div style={{width:3,height:36,borderRadius:T.r99,background:t.type==='income'?T.g:T.r,flexShrink:0}}/>
+                      {/* Info */}
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:3}}>
-                          <span style={{fontWeight:700,fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:160,color:T.t1}}>{t.description}</span>
-                          {t.installmentTotal&&t.installmentTotal>1&&<Chip label={`${t.installmentCurrent}/${t.installmentTotal}`} color={T.p} bg={`${T.p}18`}/>}
+                          <span style={{fontWeight:700,fontSize:13,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:150,color:T.t1}}>{t.description}</span>
+                          {t.installmentTotal&&t.installmentTotal>1&&<Chip label={`${t.installmentCurrent}/${t.installmentTotal}`} color={T.p} bg={`${T.p}12`}/>}
                         </div>
                         <div style={{fontSize:10,color:T.t3}}>{t.category} · {t.date.split('-').reverse().join('/')}{t.paymentMethod==='credit'&&cd&&` · ${cd.name}`}</div>
                       </div>
+                      {/* Direita */}
                       <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
                         <span style={{fontWeight:800,fontSize:14,color:t.type==='income'?T.g:T.r,fontFamily:"'JetBrains Mono',monospace",filter:hidden?'blur(8px)':'none',transition:'filter 0.3s'}}>{t.type==='income'?'+':'−'}{fmt(t.amount)}</span>
                         <StatusPill status={t.status} onClick={()=>toggleStatus(t)}/>
@@ -662,22 +691,28 @@ export default function Home() {
           <div className="fade">
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
               <div>
-                <div style={{fontWeight:800,fontSize:17,letterSpacing:'-0.3px'}}>Cartões</div>
+                <div style={{fontWeight:800,fontSize:17,letterSpacing:'-0.3px',color:T.t1}}>Cartões</div>
                 <div style={{fontSize:11,color:T.t3,marginTop:2}}>{cards.length} cadastrado(s)</div>
               </div>
               <PillBtn onClick={()=>setShowCard(true)} color={T.p}>+ Cartão</PillBtn>
             </div>
-            {cards.length===0&&<div style={{textAlign:'center',padding:'60px 0',color:T.t3}}><div style={{fontSize:40,marginBottom:12}}>💳</div><div style={{fontWeight:700,fontSize:14,color:T.t2}}>Nenhum cartão</div></div>}
+            {cards.length===0&&(
+              <div style={{textAlign:'center',padding:'60px 0'}}>
+                <div style={{fontSize:40,marginBottom:12}}>💳</div>
+                <div style={{fontWeight:700,fontSize:14,color:T.t2}}>Nenhum cartão</div>
+                <div style={{fontSize:12,color:T.t3,marginTop:4}}>Toque em "+ Cartão"</div>
+              </div>
+            )}
             <div style={{display:'flex',flexDirection:'column',gap:12}}>
               {cardSpend.map(card=>{
                 const pct=Math.min(card.limit>0?(card.spent/card.limit)*100:0,100)
                 const danger=pct>80
                 return(
-                  <div key={card.id} style={{background:`linear-gradient(135deg,${card.color}12 0%,${T.bg2} 60%)`,borderRadius:T.r20,padding:20,border:`1px solid ${card.color}35`,position:'relative',overflow:'hidden'}}>
-                    <div style={{position:'absolute',right:-20,top:-20,width:100,height:100,borderRadius:'50%',background:`${card.color}08`}}/>
+                  <div key={card.id} style={{background:T.bg2,borderRadius:T.r20,padding:20,border:`1px solid ${T.b1}`,borderTop:`3px solid ${card.color}`,boxShadow:shadow}}>
+                    {/* Header */}
                     <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:16}}>
                       <div style={{display:'flex',alignItems:'center',gap:10}}>
-                        <div style={{background:`${card.color}20`,borderRadius:T.r12,width:42,height:42,display:'flex',alignItems:'center',justifyContent:'center',fontSize:20}}>💳</div>
+                        <div style={{background:`${card.color}15`,borderRadius:T.r12,width:44,height:44,display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,flexShrink:0}}>💳</div>
                         <div>
                           <div style={{fontWeight:800,fontSize:15,color:T.t1}}>{card.name}</div>
                           <div style={{fontSize:10,color:T.t3,marginTop:2,filter:hidden?'blur(5px)':'none',transition:'filter 0.3s'}}>Limite {fmt(card.limit)}</div>
@@ -685,20 +720,25 @@ export default function Home() {
                       </div>
                       <IBtn onClick={()=>setConfirm({type:'card',id:card.id,message:`Excluir o cartão "${card.name}"?`})} danger>×</IBtn>
                     </div>
+                    {/* Valores */}
                     <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
-                      {[{label:'GASTO',val:card.spent,color:card.color},{label:'DISPONÍVEL',val:Math.max(card.limit-card.spent,0),color:T.g}].map(x=>(
-                        <div key={x.label} style={{background:'#FFFFFF06',borderRadius:T.r12,padding:'10px 12px'}}>
-                          <div style={{fontSize:9,color:T.t3,fontWeight:800,letterSpacing:'1px',marginBottom:4}}>{x.label}</div>
+                      {[
+                        {label:'GASTO',   val:card.spent,                       color:card.color},
+                        {label:'LIVRE',   val:Math.max(card.limit-card.spent,0), color:T.g},
+                      ].map(x=>(
+                        <div key={x.label} style={{background:T.bg3,borderRadius:T.r12,padding:'12px 14px'}}>
+                          <div style={{fontSize:9,color:T.t3,fontWeight:800,letterSpacing:'1px',marginBottom:5,textTransform:'uppercase'}}>{x.label}</div>
                           <div style={{fontSize:18,fontWeight:900,color:x.color,fontFamily:"'JetBrains Mono',monospace",filter:hidden?'blur(8px)':'none',transition:'filter 0.3s'}}>{fmt(x.val)}</div>
                         </div>
                       ))}
                     </div>
-                    <div style={{background:'#FFFFFF10',borderRadius:T.r99,height:5}}>
-                      <div style={{background:danger?T.r:card.color,borderRadius:T.r99,height:5,width:`${pct}%`,transition:'width 0.4s ease',boxShadow:danger?`0 0 8px ${T.r}60`:`0 0 8px ${card.color}60`}}/>
+                    {/* Barra */}
+                    <div style={{background:T.bg4,borderRadius:T.r99,height:6}}>
+                      <div style={{background:danger?T.r:card.color,borderRadius:T.r99,height:6,width:`${pct}%`,transition:'width 0.4s ease'}}/>
                     </div>
                     <div style={{display:'flex',justifyContent:'space-between',marginTop:6}}>
                       <span style={{fontSize:10,color:danger?T.r:T.t3,fontWeight:danger?700:400}}>{pct.toFixed(0)}% utilizado</span>
-                      {danger&&<span style={{fontSize:10,color:T.r,fontWeight:800}}>⚠ Limite alto</span>}
+                      {danger&&<span style={{fontSize:10,color:T.r,fontWeight:800}}>⚠ Atenção</span>}
                     </div>
                   </div>
                 )
@@ -712,71 +752,91 @@ export default function Home() {
           <div className="fade">
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
               <div>
-                <div style={{fontWeight:800,fontSize:17,letterSpacing:'-0.3px'}}>Metas & Projetos</div>
+                <div style={{fontWeight:800,fontSize:17,letterSpacing:'-0.3px',color:T.t1}}>Metas & Projetos</div>
                 <div style={{fontSize:11,color:T.t3,marginTop:2}}>{goalStats.filter(g=>g.done).length} concluída(s) · {goalStats.filter(g=>!g.done).length} em andamento</div>
               </div>
-              <PillBtn onClick={()=>setShowGoal(true)} color={T.y}>+ Meta</PillBtn>
+              <PillBtn onClick={()=>setShowGoal(true)} color={T.primary}>+ Meta</PillBtn>
             </div>
+
             {goalStats.length>0&&(
-              <div style={{background:T.bg2,borderRadius:T.r12,padding:'12px 14px',marginBottom:12,display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6,textAlign:'center',border:`1px solid ${T.b1}`}}>
-                {[['Guardado',fmtH(totalSaved),T.g],['Total',fmtH(totalTarget),T.t1],['Progresso',totalTarget>0?`${((totalSaved/totalTarget)*100).toFixed(0)}%`:'—',T.y]].map(([l,v,c])=>(
-                  <div key={l}><div style={{fontSize:8,color:T.t3,fontWeight:800,letterSpacing:'1px',marginBottom:4,textTransform:'uppercase'}}>{l}</div><div style={{fontSize:13,fontWeight:800,color:c,fontFamily:"'JetBrains Mono',monospace"}}>{v}</div></div>
+              <div style={{background:T.bg2,borderRadius:T.r14,padding:'14px 16px',marginBottom:14,display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,textAlign:'center',border:`1px solid ${T.b1}`,boxShadow:shadowSm}}>
+                {[['Guardado',fmtH(totalSaved),T.g],['Total',fmtH(totalTarget),T.t1],['Progresso',totalTarget>0?`${((totalSaved/totalTarget)*100).toFixed(0)}%`:'—',T.primary]].map(([l,v,c])=>(
+                  <div key={l}>
+                    <div style={{fontSize:8,color:T.t3,fontWeight:800,letterSpacing:'1px',marginBottom:5,textTransform:'uppercase'}}>{l}</div>
+                    <div style={{fontSize:14,fontWeight:800,color:c,fontFamily:"'JetBrains Mono',monospace"}}>{v}</div>
+                  </div>
                 ))}
               </div>
             )}
+
             {goalStats.length===0?(
-              <div style={{textAlign:'center',padding:'60px 0',color:T.t3}}><div style={{fontSize:44,marginBottom:12}}>🎯</div><div style={{fontWeight:700,fontSize:14,color:T.t2}}>Nenhuma meta</div><div style={{fontSize:12,marginTop:4}}>Toque em "+ Meta"</div></div>
+              <div style={{textAlign:'center',padding:'60px 0'}}>
+                <div style={{fontSize:44,marginBottom:12}}>🎯</div>
+                <div style={{fontWeight:700,fontSize:14,color:T.t2}}>Nenhuma meta</div>
+                <div style={{fontSize:12,marginTop:4,color:T.t3}}>Toque em "+ Meta"</div>
+              </div>
             ):(
               <div style={{display:'flex',flexDirection:'column',gap:10}}>
                 {goalStats.map(g=>{
                   const isExp=expandGoal===g.id
                   return(
-                    <div key={g.id} style={{background:T.bg2,borderRadius:T.r20,overflow:'hidden',border:`1px solid ${g.done?T.g+'35':g.color+'25'}`}}>
+                    <div key={g.id} style={{background:T.bg2,borderRadius:T.r20,overflow:'hidden',border:`1px solid ${T.b1}`,borderLeft:`3px solid ${g.done?T.g:g.color}`,boxShadow:shadow}}>
                       <div style={{padding:'16px 16px 14px'}}>
+                        {/* Header */}
                         <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
                           <div style={{display:'flex',alignItems:'center',gap:10}}>
-                            <div style={{background:`${g.color}15`,borderRadius:T.r12,width:44,height:44,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}}>{g.emoji}</div>
+                            <div style={{background:`${g.color}12`,borderRadius:T.r12,width:44,height:44,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,border:`1px solid ${g.color}25`,flexShrink:0}}>{g.emoji}</div>
                             <div>
                               <div style={{fontWeight:800,fontSize:14,color:T.t1}}>{g.name}</div>
-                              <div style={{fontSize:10,color:T.t3,marginTop:2}}>
+                              <div style={{fontSize:10,color:T.t3,marginTop:3}}>
                                 {g.done?<span style={{color:T.g,fontWeight:700}}>✓ Concluída!</span>:g.days<=0?<span style={{color:T.r}}>Prazo encerrado</span>:`${g.days} dias · ${new Date(g.deadline+'T12:00:00').toLocaleDateString('pt-BR')}`}
                               </div>
                             </div>
                           </div>
-                          <div style={{display:'flex',gap:5}}>
+                          <div style={{display:'flex',gap:5,flexShrink:0}}>
                             <PillBtn onClick={()=>setShowContrib(g.id)} size="sm" color={g.color} variant="outline">+ Aportar</PillBtn>
                             <IBtn onClick={()=>setConfirm({type:'goal',id:g.id,message:`Excluir a meta "${g.name}"?`})} danger>×</IBtn>
                           </div>
                         </div>
+
+                        {/* Progresso */}
                         <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
-                          <span style={{fontSize:12,fontWeight:600,color:T.t2,fontFamily:"'JetBrains Mono',monospace",filter:hidden?'blur(6px)':'none',transition:'filter 0.3s'}}>{fmt(g.saved)}</span>
-                          <span style={{fontSize:12,fontWeight:800,color:g.done?T.g:g.color,fontFamily:"'JetBrains Mono',monospace"}}>{hidden?'••%':`${g.pct.toFixed(1)}%`}</span>
+                          <span style={{fontSize:12,fontWeight:700,color:T.t2,fontFamily:"'JetBrains Mono',monospace",filter:hidden?'blur(6px)':'none',transition:'filter 0.3s'}}>{fmt(g.saved)}</span>
+                          <span style={{fontSize:12,fontWeight:800,color:g.done?T.g:g.color}}>{hidden?'••%':`${g.pct.toFixed(1)}%`}</span>
                         </div>
-                        <div style={{background:T.bg4,borderRadius:T.r99,height:6,marginBottom:6}}>
-                          <div style={{background:g.done?T.g:g.color,borderRadius:T.r99,height:6,width:`${g.pct}%`,transition:'width 0.5s ease',boxShadow:`0 0 10px ${g.done?T.g:g.color}50`}}/>
+                        <div style={{background:T.bg4,borderRadius:T.r99,height:8,marginBottom:6}}>
+                          <div style={{background:g.done?`linear-gradient(90deg,${T.g},#34D399)`:g.color,borderRadius:T.r99,height:8,width:`${g.pct}%`,transition:'width 0.5s ease'}}/>
                         </div>
-                        <div style={{display:'flex',justifyContent:'space-between',marginBottom:12}}>
+                        <div style={{display:'flex',justifyContent:'space-between',marginBottom:14}}>
                           <span style={{fontSize:10,color:T.t3,filter:hidden?'blur(5px)':'none',transition:'filter 0.3s'}}>Meta: {fmt(g.target)}</span>
                           {!g.done&&<span style={{fontSize:10,color:T.y,fontWeight:700,filter:hidden?'blur(5px)':'none',transition:'filter 0.3s'}}>{fmt(g.needed)}/mês</span>}
                         </div>
+
+                        {/* Stats */}
                         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6}}>
-                          {[{l:'Falta',v:g.done?'—':fmtH(Math.max(g.target-g.saved,0)),c:T.r},{l:'Aportes',v:String(g.contributions.length),c:T.t2},{l:'/mês',v:g.done?'✓':fmtH(g.needed),c:T.y}].map(s=>(
-                            <div key={s.l} style={{background:T.bg4,borderRadius:T.r8,padding:'7px 8px',textAlign:'center'}}>
-                              <div style={{fontSize:8,color:T.t3,fontWeight:800,letterSpacing:'1px',marginBottom:3,textTransform:'uppercase'}}>{s.l}</div>
-                              <div style={{fontSize:10,fontWeight:800,color:s.c,fontFamily:"'JetBrains Mono',monospace"}}>{s.v}</div>
+                          {[
+                            {l:'Falta',    v:g.done?'—':fmtH(Math.max(g.target-g.saved,0)), c:T.r},
+                            {l:'Aportes',  v:String(g.contributions.length),                  c:T.t2},
+                            {l:'/mês',     v:g.done?'✓':fmtH(g.needed),                      c:T.primary},
+                          ].map(s=>(
+                            <div key={s.l} style={{background:T.bg3,borderRadius:T.r10,padding:'8px 10px',textAlign:'center'}}>
+                              <div style={{fontSize:8,color:T.t3,fontWeight:800,letterSpacing:'1px',marginBottom:4,textTransform:'uppercase'}}>{s.l}</div>
+                              <div style={{fontSize:11,fontWeight:800,color:s.c,fontFamily:"'JetBrains Mono',monospace"}}>{s.v}</div>
                             </div>
                           ))}
                         </div>
+
                         {g.contributions.length>0&&(
-                          <button onClick={()=>setExpandGoal(isExp?null:g.id)} style={{background:'none',border:'none',color:T.t3,cursor:'pointer',fontSize:10,marginTop:10,padding:0,fontFamily:'Inter',fontWeight:600,display:'flex',alignItems:'center',gap:3}}>
+                          <button onClick={()=>setExpandGoal(isExp?null:g.id)} style={{background:'none',border:'none',color:T.t3,cursor:'pointer',fontSize:10,marginTop:12,padding:0,fontFamily:'Inter',fontWeight:600,display:'flex',alignItems:'center',gap:4}}>
                             {isExp?'▲ ocultar':'▼ ver'} aportes ({g.contributions.length})
                           </button>
                         )}
                       </div>
+
                       {isExp&&(
-                        <div style={{borderTop:`1px solid ${T.b1}`,padding:'10px 16px',display:'flex',flexDirection:'column',gap:6}}>
+                        <div style={{borderTop:`1px solid ${T.b1}`,background:T.bg1,padding:'10px 16px',display:'flex',flexDirection:'column',gap:6}}>
                           {[...g.contributions].reverse().map(c=>(
-                            <div key={c.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'5px 0',borderBottom:`1px solid ${T.bg4}`}}>
+                            <div key={c.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 0',borderBottom:`1px solid ${T.b1}`}}>
                               <div>
                                 <span style={{fontSize:12,fontWeight:700,color:T.g,fontFamily:"'JetBrains Mono',monospace",filter:hidden?'blur(6px)':'none',transition:'filter 0.3s'}}>+{fmt(c.amount)}</span>
                                 <span style={{fontSize:10,color:T.t3,marginLeft:8}}>{c.date.split('-').reverse().join('/')}{c.note&&` · ${c.note}`}</span>
@@ -796,122 +856,125 @@ export default function Home() {
 
         {/* ════ RELATÓRIO ════ */}
         {tab==='relatorio'&&(
-          <div className="fade" style={{display:'flex',flexDirection:'column',gap:10}}>
-            <div style={{fontWeight:800,fontSize:17,letterSpacing:'-0.3px',marginBottom:4}}>Relatório · {MONTHS[month]} {year}</div>
-            <div style={{background:`linear-gradient(135deg,${T.bg3},#120A30)`,borderRadius:T.r20,padding:20,border:`1px solid ${T.b2}`}}>
-              <SectionLabel>Resumo</SectionLabel>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6,marginBottom:10}}>
-                {[['Entradas',fmtH(income),T.g],['Saídas',fmtH(expense),T.r],['Saldo',fmtH(balance),balance>=0?T.g:T.r]].map(([l,v,c])=>(
-                  <div key={l} style={{background:'#FFFFFF06',borderRadius:T.r12,padding:'10px 8px',textAlign:'center'}}>
-                    <div style={{fontSize:8,color:T.t3,fontWeight:800,letterSpacing:'1px',marginBottom:4,textTransform:'uppercase'}}>{l}</div>
-                    <div style={{fontSize:12,fontWeight:800,color:c,fontFamily:"'JetBrains Mono',monospace"}}>{v}</div>
+          <div className="fade" style={{display:'flex',flexDirection:'column',gap:12}}>
+            <div style={{fontWeight:800,fontSize:17,letterSpacing:'-0.3px',marginBottom:4,color:T.t1}}>Relatório · {MONTHS[month]} {year}</div>
+
+            {/* Hero relatório — fundo violeta, textos brancos */}
+            <div style={{background:`linear-gradient(135deg,${T.primary} 0%,${T.primaryD} 100%)`,borderRadius:T.r20,padding:'20px 18px',boxShadow:`0 8px 32px ${T.primary}40`}}>
+              <SL light>Resumo</SL>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:8}}>
+                {[['Entradas',fmtH(income),'#6EF5D4'],['Saídas',fmtH(expense),'#FF8FAB'],['Saldo',fmtH(balance),'#FFFFFF']].map(([l,v,c])=>(
+                  <div key={l} style={{background:'rgba(255,255,255,0.14)',borderRadius:T.r12,padding:'10px 8px',textAlign:'center'}}>
+                    <div style={{fontSize:8,color:'rgba(255,255,255,0.55)',fontWeight:800,letterSpacing:'1px',marginBottom:5,textTransform:'uppercase'}}>{l}</div>
+                    <div style={{fontSize:13,fontWeight:800,color:c,fontFamily:"'JetBrains Mono',monospace"}}>{v}</div>
                   </div>
                 ))}
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6}}>
-                {[['Recebido',fmtH(paidIn),T.g],['Pago',fmtH(paidOut),T.b],['A pagar',fmtH(pendingOut),T.y]].map(([l,v,c])=>(
-                  <div key={l} style={{background:'#FFFFFF06',borderRadius:T.r12,padding:'10px 8px',textAlign:'center'}}>
-                    <div style={{fontSize:8,color:T.t3,fontWeight:800,letterSpacing:'1px',marginBottom:4,textTransform:'uppercase'}}>{l}</div>
-                    <div style={{fontSize:12,fontWeight:800,color:c,fontFamily:"'JetBrains Mono',monospace"}}>{v}</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8}}>
+                {[['Recebido',fmtH(paidIn),'#6EF5D4'],['Pago',fmtH(paidOut),'#93C5FD'],['A pagar',fmtH(pendingOut),'#FCD34D']].map(([l,v,c])=>(
+                  <div key={l} style={{background:'rgba(255,255,255,0.1)',borderRadius:T.r12,padding:'10px 8px',textAlign:'center'}}>
+                    <div style={{fontSize:8,color:'rgba(255,255,255,0.5)',fontWeight:800,letterSpacing:'1px',marginBottom:5,textTransform:'uppercase'}}>{l}</div>
+                    <div style={{fontSize:13,fontWeight:800,color:c,fontFamily:"'JetBrains Mono',monospace"}}>{v}</div>
                   </div>
                 ))}
               </div>
             </div>
-            <div style={{background:T.bg2,borderRadius:T.r16,padding:16,border:`1px solid ${T.b1}`}}>
-              <SectionLabel>Por Categoria</SectionLabel>
-              {catData.length===0?<div style={{textAlign:'center',color:T.t3,padding:16,fontSize:12}}>Sem dados</div>:catData.map((c,i)=>(
-                <div key={c.name} style={{marginBottom:10}}>
-                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:5,alignItems:'center'}}>
-                    <div style={{display:'flex',alignItems:'center',gap:6}}>
-                      <div style={{width:8,height:8,borderRadius:3,background:PCOLORS[i%PCOLORS.length]}}/>
-                      <span style={{fontSize:12,color:T.t1}}>{c.name}</span>
+
+            <Card>
+              <SL>Por Categoria</SL>
+              {catData.length===0?<div style={{textAlign:'center',color:T.t3,padding:'16px 0',fontSize:12}}>Sem dados este mês</div>:catData.map((c,i)=>(
+                <div key={c.name} style={{marginBottom:12}}>
+                  <div style={{display:'flex',justifyContent:'space-between',marginBottom:6,alignItems:'center'}}>
+                    <div style={{display:'flex',alignItems:'center',gap:7}}>
+                      <div style={{width:8,height:8,borderRadius:3,background:PCOLORS[i%PCOLORS.length],flexShrink:0}}/>
+                      <span style={{fontSize:12,color:T.t1,fontWeight:500}}>{c.name}</span>
                     </div>
                     <div style={{display:'flex',gap:10,alignItems:'center'}}>
                       <span style={{fontSize:10,color:T.t3}}>{expense>0?((c.value/expense)*100).toFixed(0):0}%</span>
                       <span style={{fontSize:12,fontWeight:700,fontFamily:"'JetBrains Mono',monospace",color:T.t1,filter:hidden?'blur(6px)':'none',transition:'filter 0.3s'}}>{fmt(c.value)}</span>
                     </div>
                   </div>
-                  <div style={{background:T.bg4,borderRadius:T.r99,height:3}}>
-                    <div style={{background:PCOLORS[i%PCOLORS.length],borderRadius:T.r99,height:3,width:`${expense>0?(c.value/expense)*100:0}%`}}/>
+                  <div style={{background:T.bg4,borderRadius:T.r99,height:4}}>
+                    <div style={{background:PCOLORS[i%PCOLORS.length],borderRadius:T.r99,height:4,width:`${expense>0?(c.value/expense)*100:0}%`}}/>
                   </div>
                 </div>
               ))}
-            </div>
-            <div style={{background:T.bg2,borderRadius:T.r16,padding:16,border:`1px solid ${T.b1}`}}>
-              <SectionLabel>Por Pagamento</SectionLabel>
+            </Card>
+
+            <Card>
+              <SL>Por Pagamento</SL>
               {[['credit','Cartão',T.p],['pix','PIX',T.g],['débito','Débito',T.b],['dinheiro','Dinheiro',T.y]].map(([pm,label,color])=>{
                 const total=monthTx.filter(t=>t.paymentMethod===pm&&t.type==='expense').reduce((s,t)=>s+t.amount,0)
                 if(!total) return null
                 return(
-                  <div key={pm} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'9px 0',borderBottom:`1px solid ${T.bg4}`}}>
+                  <div key={pm} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 0',borderBottom:`1px solid ${T.b1}`}}>
                     <div style={{display:'flex',alignItems:'center',gap:8}}>
-                      <div style={{width:8,height:8,borderRadius:3,background:color}}/>
+                      <div style={{width:8,height:8,borderRadius:3,background:color,flexShrink:0}}/>
                       <span style={{fontSize:12,color:T.t2}}>{label}</span>
                     </div>
                     <span style={{fontWeight:800,fontSize:13,fontFamily:"'JetBrains Mono',monospace",color:T.t1,filter:hidden?'blur(6px)':'none',transition:'filter 0.3s'}}>{fmt(total)}</span>
                   </div>
                 )
               })}
-            </div>
+            </Card>
           </div>
         )}
       </main>
 
       {/* ── BOTTOM NAV ── */}
-      <nav style={{position:'fixed',bottom:0,left:0,right:0,background:`${T.bg2}F0`,backdropFilter:'blur(20px)',borderTop:`1px solid ${T.b1}`,display:'flex',paddingBottom:'env(safe-area-inset-bottom,8px)',zIndex:100}}>
+      <nav style={{position:'fixed',bottom:0,left:0,right:0,background:`${T.bg2}F8`,backdropFilter:'blur(20px)',borderTop:`1px solid ${T.b1}`,display:'flex',paddingBottom:'env(safe-area-inset-bottom,8px)',zIndex:100,boxShadow:'0 -4px 20px rgba(124,92,252,0.08)'}}>
         {navItems.map(item=>{
           const active=tab===item.id
           return(
             <button key={item.id} onClick={()=>setTab(item.id)} style={{flex:1,background:'none',border:'none',cursor:'pointer',fontFamily:'Inter',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:3,padding:'10px 0',transition:'all 0.15s',position:'relative'}}>
-              <span style={{fontSize:18,lineHeight:1,opacity:active?1:0.4,transition:'opacity 0.15s'}}>{item.icon}</span>
+              <span style={{fontSize:18,lineHeight:1,opacity:active?1:0.35,transition:'opacity 0.15s'}}>{item.icon}</span>
               <span style={{fontSize:9,fontWeight:active?800:500,color:active?T.primary:T.t3,letterSpacing:'0.3px',transition:'color 0.15s'}}>{item.label}</span>
-              {active&&<div style={{width:16,height:2,background:T.primary,borderRadius:T.r99,position:'absolute',bottom:8,boxShadow:`0 0 8px ${T.primary}80`}}/>}
+              {active&&<div style={{width:20,height:3,background:T.primary,borderRadius:T.r99,position:'absolute',bottom:6,boxShadow:`0 0 8px ${T.primary}60`}}/>}
             </button>
           )
         })}
       </nav>
 
       {/* ════ SHEETS ════ */}
-
       {showNew&&(
         <Sheet onClose={()=>setShowNew(false)} title="Novo Lançamento">
           <Seg options={[['expense','⬇ Saída',T.r],['income','⬆ Entrada',T.g]]} value={form.type} onChange={v=>setForm(f=>({...f,type:v,category:v==='income'?'Salário':'Outros'}))}/>
           <Seg options={[['unico','Único',T.g],['parcelado','Parcelado',T.p],['fixo','Fixo',T.y]]} value={form.mode} onChange={v=>setForm(f=>({...f,mode:v}))}/>
-          <SheetField label="Descrição"><input type="text" placeholder={form.mode==='fixo'?'Ex: Salário, Aluguel...':'Ex: Mercado, Netflix...'} value={form.description} onChange={e=>setForm(p=>({...p,description:e.target.value}))} style={IS}/></SheetField>
-          <SheetRow>
-            <SheetField label={form.mode==='parcelado'?'Valor Total (R$)':'Valor (R$)'}><input type="number" placeholder="0,00" value={form.amount} onChange={e=>setForm(p=>({...p,amount:e.target.value}))} style={IS}/></SheetField>
+          <SF label="Descrição"><input type="text" placeholder={form.mode==='fixo'?'Ex: Salário, Aluguel...':'Ex: Mercado, Netflix...'} value={form.description} onChange={e=>setForm(p=>({...p,description:e.target.value}))} style={IS}/></SF>
+          <SR>
+            <SF label={form.mode==='parcelado'?'Valor Total (R$)':'Valor (R$)'}><input type="number" placeholder="0,00" value={form.amount} onChange={e=>setForm(p=>({...p,amount:e.target.value}))} style={IS}/></SF>
             {form.mode==='fixo'
-              ?<SheetField label="Dia do mês"><input type="number" min="1" max="28" value={form.dayOfMonth} onChange={e=>setForm(p=>({...p,dayOfMonth:e.target.value}))} style={IS}/></SheetField>
-              :<SheetField label={form.mode==='parcelado'?'Data 1ª parcela':'Data'}><input type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))} style={IS}/></SheetField>
+              ?<SF label="Dia do mês"><input type="number" min="1" max="28" value={form.dayOfMonth} onChange={e=>setForm(p=>({...p,dayOfMonth:e.target.value}))} style={IS}/></SF>
+              :<SF label={form.mode==='parcelado'?'Data 1ª parcela':'Data'}><input type="date" value={form.date} onChange={e=>setForm(p=>({...p,date:e.target.value}))} style={IS}/></SF>
             }
-          </SheetRow>
+          </SR>
           {form.mode==='parcelado'&&(
-            <SheetField label="Parcelas">
+            <SF label="Parcelas">
               <div style={{display:'flex',gap:5,flexWrap:'wrap',marginBottom:8}}>
                 {['2','3','4','6','10','12','18','24','36','48'].map(n=>(
-                  <button key={n} onClick={()=>setForm(p=>({...p,installments:n}))} style={{padding:'6px 12px',border:`1.5px solid ${form.installments===n?T.p:T.b1}`,borderRadius:T.r99,cursor:'pointer',fontWeight:700,fontSize:12,fontFamily:'Inter',background:form.installments===n?`${T.p}18`:'transparent',color:form.installments===n?T.p:T.t3,transition:'all 0.15s'}}>{n}x</button>
+                  <button key={n} onClick={()=>setForm(p=>({...p,installments:n}))} style={{padding:'6px 12px',border:`1.5px solid ${form.installments===n?T.p:T.b1}`,borderRadius:T.r99,cursor:'pointer',fontWeight:700,fontSize:12,fontFamily:'Inter',background:form.installments===n?`${T.p}12`:T.bg3,color:form.installments===n?T.p:T.t3,transition:'all 0.15s'}}>{n}x</button>
                 ))}
               </div>
               {form.amount&&parseInt(form.installments)>1&&(
-                <div style={{fontSize:12,color:T.p,background:`${T.p}12`,borderRadius:T.r8,padding:'8px 12px',fontWeight:600}}>{form.installments}x de {fmt(parseFloat(form.amount)/parseInt(form.installments))} = {fmt(parseFloat(form.amount))}</div>
+                <div style={{fontSize:12,color:T.p,background:`${T.p}10`,borderRadius:T.r8,padding:'8px 12px',fontWeight:600,border:`1px solid ${T.p}20`}}>{form.installments}x de {fmt(parseFloat(form.amount)/parseInt(form.installments))} = {fmt(parseFloat(form.amount))}</div>
               )}
-            </SheetField>
+            </SF>
           )}
-          <SheetRow>
-            <SheetField label="Categoria"><select value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))} style={IS}>{(form.type==='income'?CAT_INC:CAT_EXP).map(c=><option key={c}>{c}</option>)}</select></SheetField>
-            <SheetField label="Pagamento"><select value={form.paymentMethod} onChange={e=>setForm(p=>({...p,paymentMethod:e.target.value,cardId:''}))} style={IS}><option value="pix">PIX</option><option value="credit">Crédito</option><option value="débito">Débito</option><option value="dinheiro">Dinheiro</option></select></SheetField>
-          </SheetRow>
-          {form.paymentMethod==='credit'&&<SheetField label="Cartão"><select value={form.cardId} onChange={e=>setForm(p=>({...p,cardId:e.target.value}))} style={IS}><option value="">Selecionar...</option>{cards.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></SheetField>}
+          <SR>
+            <SF label="Categoria"><select value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))} style={IS}>{(form.type==='income'?CAT_INC:CAT_EXP).map(c=><option key={c}>{c}</option>)}</select></SF>
+            <SF label="Pagamento"><select value={form.paymentMethod} onChange={e=>setForm(p=>({...p,paymentMethod:e.target.value,cardId:''}))} style={IS}><option value="pix">PIX</option><option value="credit">Crédito</option><option value="débito">Débito</option><option value="dinheiro">Dinheiro</option></select></SF>
+          </SR>
+          {form.paymentMethod==='credit'&&<SF label="Cartão"><select value={form.cardId} onChange={e=>setForm(p=>({...p,cardId:e.target.value}))} style={IS}><option value="">Selecionar...</option>{cards.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></SF>}
           {form.mode!=='fixo'&&(
-            <SheetField label="Status inicial">
+            <SF label="Status inicial">
               <div style={{display:'flex',gap:8}}>
                 {[['pendente','⏳ Pendente',T.y],['pago','✓ Pago',T.g]].map(([s,l,c])=>(
-                  <button key={s} onClick={()=>setForm(p=>({...p,status:s}))} style={{flex:1,padding:'10px 0',border:`1.5px solid ${form.status===s?c:T.b1}`,borderRadius:T.r12,cursor:'pointer',fontWeight:700,fontSize:12,fontFamily:'Inter',background:form.status===s?`${c}15`:'transparent',color:form.status===s?c:T.t3,transition:'all 0.15s'}}>{l}</button>
+                  <button key={s} onClick={()=>setForm(p=>({...p,status:s}))} style={{flex:1,padding:'10px 0',border:`1.5px solid ${form.status===s?c:T.b1}`,borderRadius:T.r12,cursor:'pointer',fontWeight:700,fontSize:12,fontFamily:'Inter',background:form.status===s?`${c}10`:T.bg3,color:form.status===s?c:T.t3,transition:'all 0.15s'}}>{l}</button>
                 ))}
               </div>
-            </SheetField>
+            </SF>
           )}
-          <div style={{display:'flex',gap:8,marginTop:4}}>
+          <div style={{display:'flex',gap:8,marginTop:8}}>
             <PillBtn onClick={()=>setShowNew(false)} variant="ghost" full>Cancelar</PillBtn>
             <PillBtn onClick={addTx} color={form.mode==='fixo'?T.y:form.mode==='parcelado'?T.p:form.type==='income'?T.g:T.r} full>
               {form.mode==='fixo'?'Salvar Fixo 🔄':form.mode==='parcelado'?`Parcelar ${form.installments}x 💳`:'Salvar'}
@@ -923,24 +986,24 @@ export default function Home() {
       {editingTx&&(
         <Sheet onClose={()=>setEditingTx(null)} title="✎ Editar Lançamento">
           <Seg options={[['expense','⬇ Saída',T.r],['income','⬆ Entrada',T.g]]} value={editForm.type} onChange={v=>setEditForm(f=>({...f,type:v,category:v==='income'?'Salário':'Outros'}))}/>
-          <SheetField label="Descrição"><input type="text" value={editForm.description} onChange={e=>setEditForm(p=>({...p,description:e.target.value}))} style={IS}/></SheetField>
-          <SheetRow>
-            <SheetField label="Valor (R$)"><input type="number" value={editForm.amount} onChange={e=>setEditForm(p=>({...p,amount:e.target.value}))} style={IS}/></SheetField>
-            <SheetField label="Data"><input type="date" value={editForm.date} onChange={e=>setEditForm(p=>({...p,date:e.target.value}))} style={IS}/></SheetField>
-          </SheetRow>
-          <SheetRow>
-            <SheetField label="Categoria"><select value={editForm.category} onChange={e=>setEditForm(p=>({...p,category:e.target.value}))} style={IS}>{(editForm.type==='income'?CAT_INC:CAT_EXP).map(c=><option key={c}>{c}</option>)}</select></SheetField>
-            <SheetField label="Pagamento"><select value={editForm.paymentMethod} onChange={e=>setEditForm(p=>({...p,paymentMethod:e.target.value,cardId:''}))} style={IS}><option value="pix">PIX</option><option value="credit">Crédito</option><option value="débito">Débito</option><option value="dinheiro">Dinheiro</option></select></SheetField>
-          </SheetRow>
-          {editForm.paymentMethod==='credit'&&<SheetField label="Cartão"><select value={editForm.cardId} onChange={e=>setEditForm(p=>({...p,cardId:e.target.value}))} style={IS}><option value="">Selecionar...</option>{cards.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></SheetField>}
-          <SheetField label="Status">
+          <SF label="Descrição"><input type="text" value={editForm.description} onChange={e=>setEditForm(p=>({...p,description:e.target.value}))} style={IS}/></SF>
+          <SR>
+            <SF label="Valor (R$)"><input type="number" value={editForm.amount} onChange={e=>setEditForm(p=>({...p,amount:e.target.value}))} style={IS}/></SF>
+            <SF label="Data"><input type="date" value={editForm.date} onChange={e=>setEditForm(p=>({...p,date:e.target.value}))} style={IS}/></SF>
+          </SR>
+          <SR>
+            <SF label="Categoria"><select value={editForm.category} onChange={e=>setEditForm(p=>({...p,category:e.target.value}))} style={IS}>{(editForm.type==='income'?CAT_INC:CAT_EXP).map(c=><option key={c}>{c}</option>)}</select></SF>
+            <SF label="Pagamento"><select value={editForm.paymentMethod} onChange={e=>setEditForm(p=>({...p,paymentMethod:e.target.value,cardId:''}))} style={IS}><option value="pix">PIX</option><option value="credit">Crédito</option><option value="débito">Débito</option><option value="dinheiro">Dinheiro</option></select></SF>
+          </SR>
+          {editForm.paymentMethod==='credit'&&<SF label="Cartão"><select value={editForm.cardId} onChange={e=>setEditForm(p=>({...p,cardId:e.target.value}))} style={IS}><option value="">Selecionar...</option>{cards.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></SF>}
+          <SF label="Status">
             <div style={{display:'flex',gap:8}}>
               {[['pendente','⏳ Pendente',T.y],['pago','✓ Pago',T.g]].map(([s,l,c])=>(
-                <button key={s} onClick={()=>setEditForm(p=>({...p,status:s}))} style={{flex:1,padding:'10px 0',border:`1.5px solid ${editForm.status===s?c:T.b1}`,borderRadius:T.r12,cursor:'pointer',fontWeight:700,fontSize:12,fontFamily:'Inter',background:editForm.status===s?`${c}15`:'transparent',color:editForm.status===s?c:T.t3,transition:'all 0.15s'}}>{l}</button>
+                <button key={s} onClick={()=>setEditForm(p=>({...p,status:s}))} style={{flex:1,padding:'10px 0',border:`1.5px solid ${editForm.status===s?c:T.b1}`,borderRadius:T.r12,cursor:'pointer',fontWeight:700,fontSize:12,fontFamily:'Inter',background:editForm.status===s?`${c}10`:T.bg3,color:editForm.status===s?c:T.t3,transition:'all 0.15s'}}>{l}</button>
               ))}
             </div>
-          </SheetField>
-          <div style={{display:'flex',gap:8,marginTop:4}}>
+          </SF>
+          <div style={{display:'flex',gap:8,marginTop:8}}>
             <PillBtn onClick={()=>setEditingTx(null)} variant="ghost" full>Cancelar</PillBtn>
             <PillBtn onClick={saveEdit} color={T.b} full>Salvar alterações</PillBtn>
           </div>
@@ -949,12 +1012,12 @@ export default function Home() {
 
       {showCard&&(
         <Sheet onClose={()=>setShowCard(false)} title="Novo Cartão">
-          <SheetField label="Nome do cartão"><input type="text" placeholder="Ex: Nubank, Itaú, Inter..." value={cardForm.name} onChange={e=>setCardForm(p=>({...p,name:e.target.value}))} style={IS}/></SheetField>
-          <SheetRow>
-            <SheetField label="Limite (R$)"><input type="number" placeholder="5000" value={cardForm.limit} onChange={e=>setCardForm(p=>({...p,limit:e.target.value}))} style={IS}/></SheetField>
-            <SheetField label="Cor do cartão"><input type="color" value={cardForm.color} onChange={e=>setCardForm(p=>({...p,color:e.target.value}))} style={{...IS,padding:6,height:46,cursor:'pointer'}}/></SheetField>
-          </SheetRow>
-          <div style={{display:'flex',gap:8,marginTop:4}}>
+          <SF label="Nome do cartão"><input type="text" placeholder="Ex: Nubank, Itaú, Inter..." value={cardForm.name} onChange={e=>setCardForm(p=>({...p,name:e.target.value}))} style={IS}/></SF>
+          <SR>
+            <SF label="Limite (R$)"><input type="number" placeholder="5000" value={cardForm.limit} onChange={e=>setCardForm(p=>({...p,limit:e.target.value}))} style={IS}/></SF>
+            <SF label="Cor do cartão"><input type="color" value={cardForm.color} onChange={e=>setCardForm(p=>({...p,color:e.target.value}))} style={{...IS,padding:6,height:46,cursor:'pointer'}}/></SF>
+          </SR>
+          <div style={{display:'flex',gap:8,marginTop:8}}>
             <PillBtn onClick={()=>setShowCard(false)} variant="ghost" full>Cancelar</PillBtn>
             <PillBtn onClick={addCard} color={T.p} full>Salvar Cartão</PillBtn>
           </div>
@@ -963,28 +1026,28 @@ export default function Home() {
 
       {showGoal&&(
         <Sheet onClose={()=>setShowGoal(false)} title="Nova Meta">
-          <SheetField label="Ícone">
-            <div style={{display:'flex',flexWrap:'wrap',gap:4,background:T.bg4,borderRadius:T.r12,padding:10,marginBottom:4}}>
-              {EMOJIS.map(e=><button key={e} onClick={()=>setGoalForm(p=>({...p,emoji:e}))} style={{fontSize:20,background:goalForm.emoji===e?`${T.y}20`:'none',border:`1.5px solid ${goalForm.emoji===e?T.y:'transparent'}`,borderRadius:T.r8,width:36,height:36,cursor:'pointer',transition:'all 0.15s'}}>{e}</button>)}
+          <SF label="Ícone">
+            <div style={{display:'flex',flexWrap:'wrap',gap:4,background:T.bg3,borderRadius:T.r12,padding:10,marginBottom:4}}>
+              {EMOJIS.map(e=><button key={e} onClick={()=>setGoalForm(p=>({...p,emoji:e}))} style={{fontSize:20,background:goalForm.emoji===e?`${T.primary}12`:T.bg2,border:`1.5px solid ${goalForm.emoji===e?T.primary:T.b1}`,borderRadius:T.r8,width:36,height:36,cursor:'pointer',transition:'all 0.15s'}}>{e}</button>)}
             </div>
-          </SheetField>
-          <SheetField label="Nome do projeto"><input type="text" placeholder="Ex: Compra do Carro, Viagem..." value={goalForm.name} onChange={e=>setGoalForm(p=>({...p,name:e.target.value}))} style={IS}/></SheetField>
-          <SheetRow>
-            <SheetField label="Valor Alvo (R$)"><input type="number" placeholder="30000" value={goalForm.target} onChange={e=>setGoalForm(p=>({...p,target:e.target.value}))} style={IS}/></SheetField>
-            <SheetField label="Prazo"><input type="date" value={goalForm.deadline} onChange={e=>setGoalForm(p=>({...p,deadline:e.target.value}))} style={IS}/></SheetField>
-          </SheetRow>
-          <SheetRow>
-            <SheetField label="Cor"><input type="color" value={goalForm.color} onChange={e=>setGoalForm(p=>({...p,color:e.target.value}))} style={{...IS,padding:6,height:46,cursor:'pointer'}}/></SheetField>
+          </SF>
+          <SF label="Nome do projeto"><input type="text" placeholder="Ex: Compra do Carro, Viagem..." value={goalForm.name} onChange={e=>setGoalForm(p=>({...p,name:e.target.value}))} style={IS}/></SF>
+          <SR>
+            <SF label="Valor Alvo (R$)"><input type="number" placeholder="30000" value={goalForm.target} onChange={e=>setGoalForm(p=>({...p,target:e.target.value}))} style={IS}/></SF>
+            <SF label="Prazo"><input type="date" value={goalForm.deadline} onChange={e=>setGoalForm(p=>({...p,deadline:e.target.value}))} style={IS}/></SF>
+          </SR>
+          <SR>
+            <SF label="Cor"><input type="color" value={goalForm.color} onChange={e=>setGoalForm(p=>({...p,color:e.target.value}))} style={{...IS,padding:6,height:46,cursor:'pointer'}}/></SF>
             <div style={{display:'flex',flexDirection:'column',justifyContent:'flex-end',paddingBottom:14}}>
-              <div style={{background:`${goalForm.color}15`,border:`1.5px solid ${goalForm.color}35`,borderRadius:T.r12,padding:'10px 12px',display:'flex',alignItems:'center',gap:8}}>
+              <div style={{background:`${goalForm.color}10`,border:`1.5px solid ${goalForm.color}30`,borderRadius:T.r12,padding:'10px 12px',display:'flex',alignItems:'center',gap:8}}>
                 <span style={{fontSize:20}}>{goalForm.emoji}</span>
                 <span style={{fontSize:12,fontWeight:700,color:goalForm.color,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{goalForm.name||'Prévia'}</span>
               </div>
             </div>
-          </SheetRow>
-          <div style={{display:'flex',gap:8,marginTop:4}}>
+          </SR>
+          <div style={{display:'flex',gap:8,marginTop:8}}>
             <PillBtn onClick={()=>setShowGoal(false)} variant="ghost" full>Cancelar</PillBtn>
-            <PillBtn onClick={addGoal} color={T.y} full>Criar Meta 🎯</PillBtn>
+            <PillBtn onClick={addGoal} color={T.primary} full>Criar Meta 🎯</PillBtn>
           </div>
         </Sheet>
       )}
@@ -994,20 +1057,20 @@ export default function Home() {
         const saved=g.contributions.reduce((s,c)=>s+c.amount,0)
         return(
           <Sheet onClose={()=>setShowContrib(null)} title="Adicionar Aporte">
-            <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16,padding:'12px 14px',background:T.bg4,borderRadius:T.r12,border:`1px solid ${g.color}30`}}>
-              <span style={{fontSize:24}}>{g.emoji}</span>
+            <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:18,padding:'14px 16px',background:T.bg3,borderRadius:T.r14,border:`1px solid ${g.color}25`}}>
+              <span style={{fontSize:26}}>{g.emoji}</span>
               <div style={{flex:1}}>
-                <div style={{fontWeight:700,fontSize:14,color:T.t1}}>{g.name}</div>
-                <div style={{background:T.bg3,borderRadius:T.r99,height:4,marginTop:6}}>
-                  <div style={{background:g.color,borderRadius:T.r99,height:4,width:`${Math.min(g.target>0?(saved/g.target)*100:0,100)}%`}}/>
+                <div style={{fontWeight:700,fontSize:14,color:T.t1,marginBottom:6}}>{g.name}</div>
+                <div style={{background:T.b1,borderRadius:T.r99,height:5}}>
+                  <div style={{background:g.color,borderRadius:T.r99,height:5,width:`${Math.min(g.target>0?(saved/g.target)*100:0,100)}%`,transition:'width 0.4s'}}/>
                 </div>
-                <div style={{fontSize:10,color:T.t3,marginTop:4}}>{fmt(saved)} de {fmt(g.target)}</div>
+                <div style={{fontSize:10,color:T.t3,marginTop:5}}>{fmt(saved)} de {fmt(g.target)}</div>
               </div>
             </div>
-            <SheetField label="Valor (R$)"><input type="number" placeholder="500" value={contrib.amount} onChange={e=>setContrib(p=>({...p,amount:e.target.value}))} style={IS}/></SheetField>
-            <SheetField label="Data"><input type="date" value={contrib.date} onChange={e=>setContrib(p=>({...p,date:e.target.value}))} style={IS}/></SheetField>
-            <SheetField label="Observação (opcional)"><input type="text" placeholder="Ex: Guardei do bônus..." value={contrib.note} onChange={e=>setContrib(p=>({...p,note:e.target.value}))} style={IS}/></SheetField>
-            <div style={{display:'flex',gap:8,marginTop:4}}>
+            <SF label="Valor (R$)"><input type="number" placeholder="500" value={contrib.amount} onChange={e=>setContrib(p=>({...p,amount:e.target.value}))} style={IS}/></SF>
+            <SF label="Data"><input type="date" value={contrib.date} onChange={e=>setContrib(p=>({...p,date:e.target.value}))} style={IS}/></SF>
+            <SF label="Observação (opcional)"><input type="text" placeholder="Ex: Guardei do bônus..." value={contrib.note} onChange={e=>setContrib(p=>({...p,note:e.target.value}))} style={IS}/></SF>
+            <div style={{display:'flex',gap:8,marginTop:8}}>
               <PillBtn onClick={()=>setShowContrib(null)} variant="ghost" full>Cancelar</PillBtn>
               <PillBtn onClick={()=>addContrib(g.id)} color={g.color} full>Confirmar 💰</PillBtn>
             </div>
